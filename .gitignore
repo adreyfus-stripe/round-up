@@ -1,5 +1,5 @@
 .env
-package-lock.json
-node_modules
 .gcloudignore
 .DS_Store
+package-lock.json
+node_modules

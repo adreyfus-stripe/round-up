@@ -38,8 +38,8 @@ app.get("/become-a-partner", (req, res) => {
   res.render("connect-onboarding", { url });
 });
 
+// Verify account
 app.get("/verify-account", async (req, res) => {
-  console.log("jere", req.query);
   axios
     .post("https://connect.stripe.com/oauth/token", {
       client_secret: env.parsed.STRIPE_SECRET_KEY,
@@ -84,6 +84,7 @@ app.post("/update-payment-intent", async (req, res) => {
   const { amount, id, isDonating, selectedAccount } = req.body;
 
   if (isDonating) {
+    // Update the PaymentIntent with the new total and flag how much to donate
     stripe.paymentIntents.update(id, {
       amount,
       transfer_group: `group_${id}`,
