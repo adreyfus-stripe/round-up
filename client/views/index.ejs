@@ -1,0 +1,146 @@
+<html>
+  <head>
+    <title>Stripe Payment Intents</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" href="./styles.css" />
+    <link rel="stylesheet" type="text/css" href="./prism.css" />
+    <link rel="icon" type="image/png" sizes="104x80" href="./images/logo.png" />
+  </head>
+
+  <body>
+    <header>
+      <img src="./images/stripe-press-logo.svg" />
+      <div>
+        <a href="/" class="selected">Buy our Product</a>
+        <a href="/become-a-partner">Become a Partner</a>
+      </div>
+    </header>
+    <main id="grid">
+      <section id="checkout-form">
+        <div id="success-message-donated">
+          <p>Thank you for donating!</p>
+        </div>
+        <div id="success-message">
+          <p>Thank you for your purchase!</p>
+        </div>
+        <div id="error-message">
+          <p>Something went wrong, please <a href="/">try again</a>.</p>
+        </div>
+        <div id="checkout-items">
+          <div class="checkout-item">
+            <img src="./images/revolt_book.png" />
+            <div>
+              <h2>The Revolt of the Public</h2>
+              <p>1 x €24.99</p>
+            </div>
+            <p>€24.19</p>
+          </div>
+          <div class="checkout-item">
+            <img src="./images/dreammachine_book.png" />
+            <div>
+              <h2>The Dream Machine</h2>
+              <p>2 x €17.45</p>
+            </div>
+            <p>€34.90</p>
+          </div>
+          <div class="payment-item">
+            <span>VAT</span>
+            <span>€0.00</span>
+          </div>
+          <div class="payment-item donation">
+            <span>Donation</span>
+            <span>€0.91</span>
+          </div>
+          <div class="payment-item">
+            <span>
+              Total
+            </span>
+            <span class="total">
+              €59.09
+            </span>
+          </div>
+        </div>
+        <div id="payment-form">
+          <h5>Card details</h5>
+          <span class="test-mode"
+            >The demo is running in test mode – your card won't be
+            charged.</span
+          >
+          <form>
+            <div id="card-number" class="stripe-element"></div>
+            <div id="card-details">
+              <div id="card-expiry" class="stripe-element"></div>
+              <div id="card-cvc" class="stripe-element"></div>
+            </div>
+          </form>
+          <p id="error"></p>
+          <div id="round-up">
+            <label
+              ><input type="checkbox" id="round-up-box" />Round-up and donate to
+              charity</label
+            >
+            <div class="select">
+              <select> </select>
+              <div class="arrow">
+                <img src="./images/Rectangle.svg" />
+              </div>
+            </div>
+          </div>
+          <button id="submit-button" type="submit">
+            <span id="button-text">Buy now</span>
+            <div id="button-spinner" class="lds-ring">
+              <div></div>
+              <div></div>
+              <div></div>
+              <div></div>
+            </div>
+          </button>
+        </div>
+      </section>
+      <section id="tutorial">
+        <div id="tutorial-overview">
+          <h3>Stripe round-up demo</h3>
+          <p>
+            This demo uses <a href="https://stripe.com/docs/stripe-js">Elements</a> to create a credit card form
+            and the <a href="https://stripe.com/docs/payments/payment-intents">Payment Intents API</a> to process the charge and
+            automatically prompt the customer for authentication when the card
+            requires it.
+          </p>
+          <p>
+            It also uses <a href="https://stripe.com/docs/connect/express-accounts">Stripe Connect</a> to let users round-up their order and
+            donate to an organization of their choice. You can use Connect
+            Express to easily onboard organizations to partner with.
+          </p>
+        </div>
+        <div>
+          <h3>Stripe test cards</h3>
+          <div id="test-cards">
+            <div class="test-card">
+              <span>Default card:</span>
+              <div>
+                4242<span></span> 4242<span></span> 4242<span></span> 4242
+              </div>
+            </div>
+            <div class="test-card">
+              <span>3DS required:</span>
+              <div>
+                4000<span></span> 0000<span></span> 0000<span></span> 3063
+              </div>
+            </div>
+            <p>
+              Use these test card numbers with any 3 digit CVC and expiration
+              date in the future. The 3DS required card will trigger an
+              authentication flow.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+    <!-- Stripe.js v3 for Elements -->
+    <script src="https://js.stripe.com/v3/"></script>
+    <!-- App -->
+    <script src="/prism.js"></script>
+    <script src="/client.js"></script>
+  </body>
+</html>

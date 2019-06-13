@@ -1,0 +1,54 @@
+<html>
+  <head>
+    <title>Round-up demo</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" href="./styles.css" />
+    <link rel="stylesheet" type="text/css" href="./prism.css" />
+    <link rel="icon" type="image/png" sizes="104x80" href="./images/logo.png" />
+  </head>
+
+  <body>
+    <header>
+      <img src="./images/stripe-press-logo.svg" />
+      <div>
+        <a href="/">Buy our Product</a>
+        <a href="/become-a-partner" class="selected">Become a Partner</a>
+      </div>
+    </header>
+    <main id="grid">
+      <section id="checkout-form">
+          <h3>Stripe Press partners</h3>
+          <p>As a Stripe Press partner, your organization will be featured as an option in our "Round-up and donate" feature in our checkout.</p>
+        <button id="sign-up-button" type="submit" data-url="<%= url %>">
+          <span id="button-text">Partner with Us</span>
+          <div id="button-spinner" class="lds-ring">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+        </button>
+      </section>
+      <section id="tutorial">
+        <div id="tutorial-overview">
+          <h3>Stripe round-up demo</h3>
+          <p>
+            You can use Stripe Connect Express to easily onboard organizations
+            to partner
+          </p>
+          <p>
+            Check out a full
+            <a href="https://rocketrides.io">Connect Express demo</a>
+            with our fake marketplace business, Rocket Rides.
+          </p>
+        </div>
+      </section>
+    </main>
+    <!-- Stripe.js v3 for Elements -->
+    <script src="https://js.stripe.com/v3/"></script>
+    <!-- App -->
+    <script src="/prism.js"></script>
+    <script src="/connect-onboarding.js"></script>
+  </body>
+</html>
