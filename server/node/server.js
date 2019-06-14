@@ -35,7 +35,7 @@ app.get("/become-a-partner", (req, res) => {
     env.parsed.STRIPE_CONNECT_CLIENT_ID
   }&state=${stateValue}`;
 
-  res.render("connect-onboarding", { url });
+  res.render("connect-onboarding.html", { url });
 });
 
 // Verify account
@@ -50,17 +50,28 @@ app.get("/verify-account", async (req, res) => {
       const path = resolve("./client/connect-onboarding.html");
       res.sendFile(path);
     })
-    .catch((err) => {
+    .catch(err => {
       console.log("err", err);
     });
 });
 
+const calculateOrderTotal = (items, currency) => {
+  // Hardcoding for demo purposes
+  // In your real app calculate the order total from the items in the cart + selected currency
+  return 5909;
+};
+
+const roundOrderUp = (items, currency) => {
+  // Hardcoding for demo purposes
+  // In your real app calculate the order total and round up to the nearest dollar
+  return { total: 6000, donation: 91 };
+};
 // Create a PaymentIntent to use in our checkout page
 app.post("/create-payment-intent", async (req, res) => {
-  const { amount, currency } = req.body;
+  const { items, currency } = req.body;
 
   const paymentIntent = await stripe.paymentIntents.create({
-    amount: amount,
+    amount: calculateOrderTotal(items, currency),
     currency: currency
   });
 
@@ -81,17 +92,17 @@ app.post("/create-payment-intent", async (req, res) => {
 
 // Create a PaymentIntent to use in our checkout page
 app.post("/update-payment-intent", async (req, res) => {
-  const { amount, id, isDonating, selectedAccount } = req.body;
-
+  const { items, currency, id, isDonating, selectedAccount } = req.body;
+  const { total, donation } = roundOrderUp(items, currency);
   if (isDonating) {
     // Update the PaymentIntent with the new total and flag how much to donate
     stripe.paymentIntents.update(id, {
-      amount,
+      amount: total,
       transfer_group: `group_${id}`,
       metadata: {
         isDonating: true,
         destination: selectedAccount,
-        donationAmount: 91 // Hardcoded for demo but this would change depending on the order
+        donationAmount: donation
       }
     });
   } else {
@@ -133,7 +144,7 @@ app.post("/webhook", async (req, res) => {
       // and process a check once a month
       const { transfer } = await stripe.transfers.create({
         amount: data.object.metadata.donationAmount,
-        currency: "eur",
+        currency: "usd",
         destination: data.object.metadata.destination,
         transfer_group: data.object.transfer_group
       });

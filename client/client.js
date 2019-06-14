@@ -103,8 +103,11 @@ var displayMessage = function(hasError) {
 /* Create a PaymentIntent with a hardcoded amount and currency */
 var createPaymentIntent = function() {
   var data = {
-    amount: 5909,
-    currency: "eur"
+    items: [
+      { id: "book_dream_machine", quantity: 1 },
+      { id: "book_revolt_public", quantity: 1 }
+    ],
+    currency: "usd"
   };
 
   return fetch("/create-payment-intent", {
@@ -133,23 +136,30 @@ var populateConnectedAccounts = function(connectedAccounts) {
   });
 };
 
-var updateTotal = function(isRoundingUp) {
+var updateTotal = function(isDonating) {
   var total = document.querySelector(".total");
   var donation = document.querySelector(".donation");
-  total.textContent = isRoundingUp ? "€60.00" : "€59.19";
-  donation.style.display = isRoundingUp ? "flex" : "none";
+  total.textContent = isDonating ? "€60.00" : "€59.19";
+  donation.style.display = isDonating ? "flex" : "none";
   document.querySelector("button").disabled = true;
+
+  var data = {
+    items: [
+      { id: "book_dream_machine", quantity: 1 },
+      { id: "book_revolt_public", quantity: 1 }
+    ],
+    currency: "usd",
+    id: config.id,
+    isDonating: isDonating,
+    selectedAccount: config.selectedAccount
+  };
+
   return fetch("/update-payment-intent", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({
-      amount: isRoundingUp ? 6000 : 5919,
-      id: config.id,
-      isDonating: isRoundingUp,
-      selectedAccount: config.selectedAccount
-    })
+    body: JSON.stringify(data)
   }).then(function(result) {
     document.querySelector("button").disabled = false;
     return result.json();

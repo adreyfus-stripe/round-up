@@ -16,9 +16,13 @@ When a user go to pay, they can opt-in to a feature that will round up their ord
 
 ## Overview
 
-1. Onboard organizations using Connect. Connect Express is the fastest way to get an organization on to Stripe so you can transfer donations directly to them as they come in. The organization can add their bank account information to their Stripe accounts to pay out the funds. 
+1. Onboard organizations using Connect. 
 
-2. Create a PaymentIntent on the server for the initial order amount
+Connect Express is the fastest way to get an organization on to Stripe so you can transfer donations directly to them as they come in. 
+The organization can add their bank account information to their Stripe accounts to pay out the funds. 
+
+2. Create a PaymentIntent on the server for the initial order amount when a customer lands on your payment page.
+
 ```
 const paymentIntent = await stripe.paymentIntents.create({
     amount: amount,
@@ -26,14 +30,16 @@ const paymentIntent = await stripe.paymentIntents.create({
 });
 ```
 
-3. When a customer checks the "round up" checkbox, update the Payment Intent with the new amount (rounded up to the nearest dollar) and add metadata to the PaymentIntent describing which organization it's for.
+3. Update the PaymentIntent amount when a customer chooses to round up their order.
+
+When a customer chooses to round up their order and donate the extra amount, you should update the PaymentIntent with a new order amount rounded up to the nearest dollar (eg; 6000 for a 5909 order). 
+You can use the [metadata](https://stripe.com/docs/api/metadata) field to store information about the intended donation. The transfer
 
 ```
-stripe.paymentIntents.update(id, 
-    {
-        amount,
-        transfer_group: `group_${id}`,
-        metadata: {
+stripe.paymentIntents.update(id, {
+    amount: newAmount,
+    transfer_group: `group_${id}`,
+    metadata: {
         isDonating: true,
         destination: selectedAccount,
         donationAmount: 91 // Hardcoded for demo but this would change depending on the order
@@ -41,9 +47,15 @@ stripe.paymentIntents.update(id,
 });
 ```
 
-4. When the payment has succeeded, transfer the donation amount to that selected organization
+4. Transfer the donation amount to that selected organization when the payment succeeds. 
+
+You can associate this donation with the original payment by using the same `transfer_group` id. 
+
+Using the Transfers API requires onboarding the organization using Stripe's Connect product and only in situations where both the platform and the connected account are in the same region (i.e both in Europe or both in US). If you do not want to use Connect to directly transfer the donations, you can create your own cron job to read the recent sucessful payments and calculate the amount to send to the organization from the metadata.  
 
 ```
+// In a webhoook listening for the payment_intent.succeeded event
+
 const { transfer } = await stripe.transfers.create({
     amount: data.object.metadata.donationAmount,
     currency: "eur",
