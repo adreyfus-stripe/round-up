@@ -194,6 +194,12 @@ form {
   height: 6px;
 }
 
+#round-up-box {
+  transform: scale(1.5);
+    margin-right: 20px;
+    margin-left: 10px;
+}
+
 #tutorial {
   background: #ffffff;
   padding: 20px;
@@ -286,6 +292,7 @@ button {
   outline: none;
   position: relative;
   height: 60px;
+  cursor: pointer;
 }
 
 .lds-ring {

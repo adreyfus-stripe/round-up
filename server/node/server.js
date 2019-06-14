@@ -98,7 +98,7 @@ app.post("/update-payment-intent", async (req, res) => {
     // Update the PaymentIntent with the new total and flag how much to donate
     stripe.paymentIntents.update(id, {
       amount: total,
-      transfer_group: `group_${id}`,
+      transfer_group: `group_${id}`, // TODO: Make sure this only gets set once
       metadata: {
         isDonating: true,
         destination: selectedAccount,
@@ -106,7 +106,7 @@ app.post("/update-payment-intent", async (req, res) => {
       }
     });
   } else {
-    stripe.paymentIntents.update(id, { amount });
+    stripe.paymentIntents.update(id, { amount: calculateOrderTotal(items, currency) });
   }
   res.send();
 });
@@ -142,12 +142,13 @@ app.post("/webhook", async (req, res) => {
       // Here we use Connect to directly transfer the funds to a connected account
       // but you can simply use metadata to flag payments that have added donations
       // and process a check once a month
-      const { transfer } = await stripe.transfers.create({
+      const transfer = await stripe.transfers.create({
         amount: data.object.metadata.donationAmount,
         currency: "usd",
         destination: data.object.metadata.destination,
         transfer_group: data.object.transfer_group
       });
+
       console.log(
         `Processed a donation for ${
           data.object.metadata.destination

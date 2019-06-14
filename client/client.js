@@ -132,14 +132,18 @@ var createPaymentIntent = function() {
 var populateConnectedAccounts = function(connectedAccounts) {
   var select = document.querySelector("#round-up select");
   connectedAccounts.forEach(function(account, i) {
-    select[i] = new Option(account.id, account.id);
+    // In test mode we will hardcode the names of the organizations.
+    // In a real integration you could display the business name
+    // select[i] = new Option(account.business_name, account.id);
+    const fakeName = i ? "Donors Choose" : "Children's Book Fund";
+    select[i] = new Option(fakeName, account.id);
   });
 };
 
 var updateTotal = function(isDonating) {
   var total = document.querySelector(".total");
   var donation = document.querySelector(".donation");
-  total.textContent = isDonating ? "€60.00" : "€59.19";
+  total.textContent = isDonating ? "$60.00" : "$59.19";
   donation.style.display = isDonating ? "flex" : "none";
   document.querySelector("button").disabled = true;
 
