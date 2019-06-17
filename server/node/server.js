@@ -68,15 +68,17 @@ const roundOrderUp = (items, currency) => {
 };
 
 // Fetch all the connected accounts that represent the organizations a customer can donate to
-app.get("/connected-accounts", async (req, res) => {
+app.get("/setup-checkout-session", async (req, res) => {
   // Fetch connected accounts to display in our donation dropdown
   const connectedAccounts = await stripe.accounts.list({ limit: 3 });
+  const publicKey = env.parsed.STRIPE_PUBLIC_KEY;
   const connectedAccountIds = connectedAccounts.data.map(account => ({
     id: account.id,
     name: account.email // TODO: change to business_profile
   }));
 
   res.send({
+    publicKey,
     connectedAccounts: connectedAccountIds
   });
 });
@@ -93,6 +95,10 @@ app.post("/pay", async (req, res) => {
   } = req.body;
   const { total, donation } = roundOrderUp(items, currency);
   const transferGroup = `group_${createdDate}`; // Create a unique ID to represent this donation
+  
+  // Here we check for an isDonating flag that's set on the client
+  // You could also have a flag on a user's account model to let them always opt-in to 
+  // rounding up the order to donate
   if (isDonating) {
     // Create the charge with the order total + amount to donate
     const charge = await stripe.charges.create({
@@ -102,8 +108,8 @@ app.post("/pay", async (req, res) => {
       transfer_group: transferGroup,
       metadata: {
         // Storing info in the charge metadata lets you track info about the donation
-        isDonating: true,
-        destination: selectedAccount,
+        // Useful if you want to use webhooks to process charge.succeeded events
+        donationOrg: selectedAccount,
         donationAmount: donation
       }
     });
@@ -113,14 +119,14 @@ app.post("/pay", async (req, res) => {
       // but you can simply use metadata to flag payments that have added donations
       // and process a check once a month
       const transfer = await stripe.transfers.create({
-        amount: donation,
+        amount: charge.metadata.donationAmount,
         currency: "usd",
-        destination: charge.metadata.destination,
+        destination: charge.metadata.donationOrg,
         transfer_group: transferGroup
       });
       console.log(
         `Processed a donation for ${
-          charge.metadata.destination
+          charge.metadata.donationOrg
         } with transfer ${transfer.id}`
       );
     } else {

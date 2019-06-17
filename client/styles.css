@@ -208,7 +208,10 @@ form {
   flex-basis: 40%;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+}
+
+#tutorial-overview {
+  margin-bottom: 20px;
 }
 
 #tutorial-overview h3:not(:first-of-type) {

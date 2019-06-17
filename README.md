@@ -4,7 +4,7 @@ A round up and donate program allows your customers to round their order total t
 
 Examples programs can be found at [Lyft](https://www.lyft.com/round-up) and in grocery stores. A round-up program should: 
 
-* Have a way to onboard organization who want to accept donations
+* Have a way to onboard organizations who want to accept donations
 * Offer the customer the ability to opt-in to the round up program
 * Transfer the donation either instantly using Stripe Connect or with a check / bank transfer on a regular (i.e monthly) cadence
 * [optionally] For recurring customers, track how much each customer has donated and send a summary at the end of the month
@@ -35,13 +35,12 @@ You can use the [metadata](https://stripe.com/docs/api/metadata) field to store 
 
 ```
 const charge = await stripe.charges.create({
-    amount: total,
+    amount: orderAmount,
     currency: currency,
     source: token,
     transfer_group: transferGroup,
     metadata: { // Storing info in the charge metadata lets you track info about the donation
-        isDonating: true,
-        destination: selectedAccount,
+        donationOrg: selectedAccount,
         donationAmount: donation
     }
 });
@@ -58,9 +57,9 @@ Using the Transfers API requires onboarding the organization using Stripe's Conn
 // After stripe.charges.create succeeds
 
 const transfer = await stripe.transfers.create({
-    amount: 1,
+    amount: donationAmount, 
     currency: "usd",
-    destination: charge.metadata.destination,
+    destination: charge.metadata.donationOrg,
     transfer_group: transferGroup
 });
 ```
