@@ -40,35 +40,8 @@ cardCvc.mount("#card-cvc");
 /* ------- PaymentIntent UI helpers ------- */
 
 var config = {
-  clientSecret: "", // stores the PaymentIntent client_secret created on the server
-  id: "",
   selectedAccount: "",
   isDonating: false
-};
-
-/*
- * Calls stripe.handleCardPayment which creates a pop-up modal to
- * prompt the user to enter  extra authentication details without leaving your page
- */
-var triggerModal = function() {
-  toggleSpinner(true);
-  stripe
-    .handleCardPayment(config.clientSecret, cardNumber)
-    .then(function(result) {
-      toggleSpinner(false);
-      if (result.error) {
-        var errorMsg = document.getElementById("error-message");
-        errorMsg.style.display = "block";
-        errorMsg.style.opacity = 1;
-        errorMsg.textContent = result.error.message;
-        setTimeout(function() {
-          errorMsg.style.display = "none";
-          errorMsg.style.opacity = 0;
-        }, 4000);
-      } else {
-        displayMessage();
-      }
-    });
 };
 
 /* ------- General UI helpers ------- */
@@ -100,35 +73,6 @@ var displayMessage = function(hasError) {
   }
 };
 
-/* Create a PaymentIntent with a hardcoded amount and currency */
-var createPaymentIntent = function() {
-  var data = {
-    items: [
-      { id: "book_dream_machine", quantity: 1 },
-      { id: "book_revolt_public", quantity: 1 }
-    ],
-    currency: "usd"
-  };
-
-  return fetch("/create-payment-intent", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(data)
-  })
-    .then(function(result) {
-      return result.json();
-    })
-    .then(function(data) {
-      config.clientSecret = data.clientSecret;
-      config.id = data.id;
-      config.selectedAccount = data.connectedAccounts[0].id;
-
-      populateConnectedAccounts(data.connectedAccounts);
-    });
-};
-
 var populateConnectedAccounts = function(connectedAccounts) {
   var select = document.querySelector("#round-up select");
   connectedAccounts.forEach(function(account, i) {
@@ -145,29 +89,51 @@ var updateTotal = function(isDonating) {
   var donation = document.querySelector(".donation");
   total.textContent = isDonating ? "$60.00" : "$59.19";
   donation.style.display = isDonating ? "flex" : "none";
+};
+
+var pay = function() {
+  var isDonating = config.isDonating;
   document.querySelector("button").disabled = true;
 
-  var data = {
-    items: [
-      { id: "book_dream_machine", quantity: 1 },
-      { id: "book_revolt_public", quantity: 1 }
-    ],
-    currency: "usd",
-    id: config.id,
-    isDonating: isDonating,
-    selectedAccount: config.selectedAccount
-  };
+  stripe
+    .createToken(cardNumber)
+    .then(function(result) {
+      var data = {
+        items: [
+          { id: "book_dream_machine", quantity: 1 },
+          { id: "book_revolt_public", quantity: 1 }
+        ],
+        currency: "usd",
+        id: config.id,
+        isDonating: isDonating,
+        selectedAccount: config.selectedAccount,
+        token: result.token && result.token.id,
+        createdDate: result.token.created
+      };
 
-  return fetch("/update-payment-intent", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(data)
-  }).then(function(result) {
-    document.querySelector("button").disabled = false;
-    return result.json();
-  });
+      return fetch("/pay", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      });
+    })
+    .then(function(result) {
+      toggleSpinner(false);
+      if (result.error) {
+        var errorMsg = document.getElementById("error-message");
+        errorMsg.style.display = "block";
+        errorMsg.style.opacity = 1;
+        errorMsg.textContent = result.error.message;
+        setTimeout(function() {
+          errorMsg.style.display = "none";
+          errorMsg.style.opacity = 0;
+        }, 4000);
+      } else {
+        displayMessage();
+      }
+    });
 };
 
 /* ------- Set up on page load ------- */
@@ -179,14 +145,26 @@ var clientSecret = urlParams.get("payment_intent_client_secret");
 if (clientSecret) {
   handleRedirectReturn(clientSecret);
 } else {
-  createPaymentIntent();
+  fetch("/connected-accounts", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  })
+    .then(response => {
+      return response.json();
+    })
+    .then(data => {
+      config.selectedAccount = data.connectedAccounts[0].id;
+      populateConnectedAccounts(data.connectedAccounts);
+    });
 }
 
 document
   .getElementById("submit-button")
   .addEventListener("click", function(evt) {
     evt.preventDefault();
-    triggerModal();
+    pay();
   });
 
 document

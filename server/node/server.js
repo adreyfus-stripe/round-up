@@ -35,7 +35,7 @@ app.get("/become-a-partner", (req, res) => {
     env.parsed.STRIPE_CONNECT_CLIENT_ID
   }&state=${stateValue}`;
 
-  res.render("connect-onboarding.html", { url });
+  res.render("connect-onboarding.ejs", { url });
 });
 
 // Verify account
@@ -66,15 +66,9 @@ const roundOrderUp = (items, currency) => {
   // In your real app calculate the order total and round up to the nearest dollar
   return { total: 6000, donation: 91 };
 };
+
 // Create a PaymentIntent to use in our checkout page
-app.post("/create-payment-intent", async (req, res) => {
-  const { items, currency } = req.body;
-
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: calculateOrderTotal(items, currency),
-    currency: currency
-  });
-
+app.get("/connected-accounts", async (req, res) => {
   // Fetch connected accounts to display in our donation dropdown
   const connectedAccounts = await stripe.accounts.list({ limit: 3 });
   const connectedAccountIds = connectedAccounts.data.map(account => ({
@@ -83,81 +77,62 @@ app.post("/create-payment-intent", async (req, res) => {
   }));
 
   res.send({
-    clientSecret: paymentIntent.client_secret,
-    id: paymentIntent.id,
-    redirectDomain: env.parsed.REDIRECT_DOMAIN,
     connectedAccounts: connectedAccountIds
   });
 });
 
-// Create a PaymentIntent to use in our checkout page
-app.post("/update-payment-intent", async (req, res) => {
-  const { items, currency, id, isDonating, selectedAccount } = req.body;
+// Pay for the order and 
+app.post("/pay", async (req, res) => {
+  const {
+    items,
+    currency,
+    token,
+    createdDate,
+    isDonating,
+    selectedAccount
+  } = req.body;
   const { total, donation } = roundOrderUp(items, currency);
+  const transferGroup = `group_${createdDate}`; // Create a unique ID to represent this donation
   if (isDonating) {
-    // Update the PaymentIntent with the new total and flag how much to donate
-    stripe.paymentIntents.update(id, {
+    // Create the charge with the order total + amount to donate
+    const charge = await stripe.charges.create({
       amount: total,
-      transfer_group: `group_${id}`, // TODO: Make sure this only gets set once
-      metadata: {
+      currency: currency,
+      source: token,
+      transfer_group: transferGroup,
+      metadata: { // Storing info in the charge metadata lets you track info about the donation
         isDonating: true,
         destination: selectedAccount,
         donationAmount: donation
       }
     });
-  } else {
-    stripe.paymentIntents.update(id, { amount: calculateOrderTotal(items, currency) });
-  }
-  res.send();
-});
 
-// A webhook to receive events sent from Stripe
-app.post("/webhook", async (req, res) => {
-  // Check if webhook signing is configured.
-  if (env.parsed.STRIPE_WEBHOOK_SECRET) {
-    // Retrieve the event by verifying the signature using the raw body and secret.
-    let event;
-    let signature = req.headers["stripe-signature"];
-    try {
-      event = stripe.webhooks.constructEvent(
-        req.rawBody,
-        signature,
-        env.parsed.STRIPE_WEBHOOK_SECRET
-      );
-    } catch (err) {
-      console.log(`⚠️  Webhook signature verification failed.`);
-      return res.sendStatus(400);
-    }
-    data = event.data;
-    eventType = event.type;
-  } else {
-    // Webhook signing is recommended, but if the secret is not configured in `config.js`,
-    // we can retrieve the event data directly from the request body.
-    data = req.body.data;
-    eventType = req.body.type;
-  }
-
-  if (eventType === "payment_intent.succeeded") {
-    if (data.object.metadata.isDonating) {
-      // Here we use Connect to directly transfer the funds to a connected account
+    if (charge.status === "succeeded") {
+      // Here we use Connect to directly transfer the funds to a connected account once the charge succeeds
       // but you can simply use metadata to flag payments that have added donations
       // and process a check once a month
       const transfer = await stripe.transfers.create({
-        amount: data.object.metadata.donationAmount,
+        amount: 1,
         currency: "usd",
-        destination: data.object.metadata.destination,
-        transfer_group: data.object.transfer_group
+        destination: charge.metadata.destination,
+        transfer_group: transferGroup
       });
-
       console.log(
         `Processed a donation for ${
-          data.object.metadata.destination
+          charge.metadata.destination
         } with transfer ${transfer.id}`
       );
+    } else {
+      console.log("The card provided could not be charged");
     }
-    // Fulfill any other orders or e-mail receipts
-    res.sendStatus(200);
+  } else {
+    stripe.charges.create({
+      amount: calculateOrderTotal(items, currency),
+      currency: currency,
+      source: token
+    });
   }
+  res.send();
 });
 
 // Start server
