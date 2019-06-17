@@ -1,4 +1,4 @@
-var stripe = Stripe("pk_test_95CWU9RNeSTr6odyHxPTd8mX", {
+var stripe = Stripe("pk_test_your_key", {
   betas: ["card_payment_method_beta_1"]
 });
 
