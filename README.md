@@ -8,7 +8,7 @@ Examples programs can be found at [Lyft](https://lyft.com/round-up) and in some 
 * Transfer the donation either instantly using Stripe Connect or with a check / bank transfer on a regular (i.e monthly) cadence
 * [optionally] For recurring customers, track how much each customer has donated and send a summary at the end of the month
 
-This demo uses Connect Express to onboard organizations and uses the Payment Intents API to process payments. You can see an example of using the Charges API in the [charges-solution](/adreyfus/round-up-recipe/tree/charges-solution) branch.
+This demo uses Connect Express to onboard organizations and uses the Payment Intents API to process payments. You can see an example of using the Charges API in the [charges-solution](https://git.corp.stripe.com/adreyfus/round-up-recipe/tree/charges-solution) branch.
 
 ## Requirements
 * Node v10.6.0+
