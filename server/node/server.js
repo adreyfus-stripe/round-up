@@ -100,7 +100,8 @@ app.post("/pay", async (req, res) => {
       currency: currency,
       source: token,
       transfer_group: transferGroup,
-      metadata: { // Storing info in the charge metadata lets you track info about the donation
+      metadata: {
+        // Storing info in the charge metadata lets you track info about the donation
         isDonating: true,
         destination: selectedAccount,
         donationAmount: donation

@@ -1,4 +1,4 @@
-var stripe = Stripe("pk_test_QdrcRBmjBttuxciPXqelqhxF", {
+var stripe = Stripe("pk_test_95CWU9RNeSTr6odyHxPTd8mX", {
   betas: ["card_payment_method_beta_1"]
 });
 
@@ -139,23 +139,19 @@ var pay = function() {
 /* ------- Set up on page load ------- */
 
 // If we have a client secret in the URL it means that we are being redirected from
-if (clientSecret) {
-  handleRedirectReturn(clientSecret);
-} else {
-  fetch("/connected-accounts", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json"
-    }
+fetch("/connected-accounts", {
+  method: "GET",
+  headers: {
+    "Content-Type": "application/json"
+  }
+})
+  .then(response => {
+    return response.json();
   })
-    .then(response => {
-      return response.json();
-    })
-    .then(data => {
-      config.selectedAccount = data.connectedAccounts[0].id;
-      populateConnectedAccounts(data.connectedAccounts);
-    });
-}
+  .then(data => {
+    config.selectedAccount = data.connectedAccounts[0].id;
+    populateConnectedAccounts(data.connectedAccounts);
+  });
 
 document
   .getElementById("submit-button")
