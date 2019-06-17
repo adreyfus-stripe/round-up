@@ -10,7 +10,10 @@ Examples programs can be found at [Lyft](https://lyft.com/round-up) and in some 
 
 This demo uses Connect Express to onboard organizations and uses the Payment Intents API to process payments. You can see an example of using the Charges API in the [charges-solution](https://git.corp.stripe.com/adreyfus/round-up-recipe/tree/charges-solution) branch.
 
-![Image of a fake checkout flow with a the round-up program](https://git.corp.stripe.com/adreyfus/round-up-recipe/blob/master/demo.gif?raw=true)
+<p align="center">
+  <img alt="Image of a fake checkout flow with a the round-up program" src="https://git.corp.stripe.com/adreyfus/round-up-recipe/blob/master/demo.gif?raw=true">
+</p>
+
 ## Requirements
 * Node v10.6.0+
 * A Stripe account
