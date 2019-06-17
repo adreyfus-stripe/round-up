@@ -38,7 +38,7 @@ app.get("/become-a-partner", (req, res) => {
   res.render("connect-onboarding.ejs", { url });
 });
 
-// Verify account
+// Verify account and create a connected account
 app.get("/verify-account", async (req, res) => {
   axios
     .post("https://connect.stripe.com/oauth/token", {
@@ -67,7 +67,7 @@ const roundOrderUp = (items, currency) => {
   return { total: 6000, donation: 91 };
 };
 
-// Create a PaymentIntent to use in our checkout page
+// Fetch all the connected accounts that represent the organizations a customer can donate to
 app.get("/connected-accounts", async (req, res) => {
   // Fetch connected accounts to display in our donation dropdown
   const connectedAccounts = await stripe.accounts.list({ limit: 3 });
@@ -81,7 +81,7 @@ app.get("/connected-accounts", async (req, res) => {
   });
 });
 
-// Pay for the order and 
+// Pay for the order and transfer any donation amount
 app.post("/pay", async (req, res) => {
   const {
     items,
@@ -123,9 +123,11 @@ app.post("/pay", async (req, res) => {
         } with transfer ${transfer.id}`
       );
     } else {
+      // Build a recovery flow here to prompt the user for a new payment method
       console.log("The card provided could not be charged");
     }
   } else {
+    // Not donating, process as a normal order
     stripe.charges.create({
       amount: calculateOrderTotal(items, currency),
       currency: currency,

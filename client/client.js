@@ -138,9 +138,6 @@ var pay = function() {
 
 /* ------- Set up on page load ------- */
 
-var urlParams = new URLSearchParams(window.location.search);
-var clientSecret = urlParams.get("payment_intent_client_secret");
-
 // If we have a client secret in the URL it means that we are being redirected from
 if (clientSecret) {
   handleRedirectReturn(clientSecret);
