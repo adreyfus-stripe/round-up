@@ -113,7 +113,7 @@ app.post("/pay", async (req, res) => {
       // but you can simply use metadata to flag payments that have added donations
       // and process a check once a month
       const transfer = await stripe.transfers.create({
-        amount: 1,
+        amount: donation,
         currency: "usd",
         destination: charge.metadata.destination,
         transfer_group: transferGroup
