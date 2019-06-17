@@ -35,7 +35,7 @@ app.get("/become-a-partner", (req, res) => {
     env.parsed.STRIPE_CONNECT_CLIENT_ID
   }&state=${stateValue}`;
 
-  res.render("connect-onboarding.html", { url });
+  res.render("connect-onboarding.ejs", { url });
 });
 
 // Verify account
