@@ -16,13 +16,13 @@ When a user go to pay, they can opt-in to a feature that will round up their ord
 
 ## Overview
 
-1. Onboard organizations using Connect. 
+### 1. Onboard organizations using Connect. 
 
 Connect Express is the fastest way to get an organization on to Stripe so you can transfer donations directly to them as they come in. 
 The organization can add their bank account information to their Stripe accounts to pay out the funds. 
 
 
-2. Charge the card the .
+### 2. Show some UI to let a user opt-in to donating.
 
 When a customer chooses to round up their order and donate the extra amount, you should create a Charge with a new order amount rounded up to the nearest dollar (eg; 6000 for a 5909 order). 
 You can use the [metadata](https://stripe.com/docs/api/metadata) field to store information about the intended donation. 
@@ -42,7 +42,7 @@ const charge = await stripe.charges.create({
 
 ```
 
-3. Transfer the donation amount to that selected organization when the payment succeeds. 
+### 3. Transfer the donation amount to that selected organization when the payment succeeds. 
 
 You can associate this donation with the original payment by using the same `transfer_group` id. 
 
