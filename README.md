@@ -1,11 +1,17 @@
 # Round up and donate
 
-You can easily add a feature to your store to enable "round up and donate". 
-When a user go to pay, they can opt-in to a feature that will round up their order amount to the nearest dollar amount and select an organization to donate the funds to.
+A round up and donate feature allows your customers to round their order total to the nearest dollar and donate the difference to an organization. 
 
+Examples programs can be found at [Lyft](https://www.lyft.com/round-up) and in grocery stores. A good program should: 
+
+* Have a way to onboard organization who want to accept donations
+* Offer the customer the ability to opt-in to the round up program
+* Transfer the donation either instantly using Stripe Connect or with a check / bank transfer on a regular (i.e monthly) cadence
+* For recurring customers, track how much each customer has donated and send a summary e-mail at the end of the month
 
 ## Requirements
 * Node v10.6.0+
+* A Stripe account 
 * [Stripe Connect](https://stripe.com/docs/connect)
 
 ## Running the demo
