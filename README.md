@@ -27,12 +27,12 @@ This demo uses Connect Express to onboard organizations and uses the Payment Int
 
 ## Overview
 
-1. Onboard organizations using Connect. 
+### 1. Onboard organizations using Connect. 
 
 Connect Express is the fastest way to get an organization on to Stripe so you can transfer donations directly to them as they come in. 
 The organization can add their bank account information to their Stripe accounts to pay out the funds. 
 
-2. Create a PaymentIntent on the server for the initial order amount when a customer lands on your payment page.
+### 2. Create a PaymentIntent on the server for the initial order amount when a customer lands on your payment page.
 
 ```
 const paymentIntent = await stripe.paymentIntents.create({
@@ -41,7 +41,7 @@ const paymentIntent = await stripe.paymentIntents.create({
 });
 ```
 
-3. Update the PaymentIntent amount when a customer chooses to round up their order.
+### 3. Update the PaymentIntent amount when a customer chooses to round up their order.
 
 When a customer chooses to round up their order and donate the extra amount, you should update the PaymentIntent with a new order amount rounded up to the nearest dollar (eg; 6000 for a 5909 order). 
 You can use the [metadata](https://stripe.com/docs/api/metadata) field to store information about the intended donation. The transfer
@@ -58,7 +58,7 @@ stripe.paymentIntents.update(id, {
 });
 ```
 
-4. Transfer the donation amount to that selected organization when the payment succeeds. 
+### 4. Transfer the donation amount to that selected organization when the payment succeeds. 
 
 You can associate this donation with the original payment by using the same `transfer_group` id. 
 
