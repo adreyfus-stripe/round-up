@@ -3,12 +3,12 @@
 A round up and donate program allows your customers to round their order total to the nearest dollar and donate the difference to an organization.
 
 Examples programs can be found at [Lyft](https://lyft.com/round-up) and in some grocery stores. A round-up program should:
-* Have a way to onboard organization who want to accept donations
+* Have a way to onboard organizations who want to accept donations
 * Offer the customer the ability to opt-in to the round up program
 * Transfer the donation either instantly using Stripe Connect or with a check / bank transfer on a regular (i.e monthly) cadence
 * [optionally] For recurring customers, track how much each customer has donated and send a summary at the end of the month
 
-This demo uses Connect Express to onboard organizations and uses the Payment Intents API to process payments. You can see an example of using the Charges API in the [charges-solution](https://github.com/adreyfus-stripe/round-up/tree/charges-solution) branch.
+This demo uses Connect Express to onboard organizations and uses the [Payment Intents API](https://stripe.com/docs/payments/payment-intents) to process payments. You can see an example of using the Charges API in the [charges-solution](https://github.com/adreyfus-stripe/round-up/tree/charges-solution) branch.
 
 <p align="center">
   <img alt="Image of a fake checkout flow with a the round-up program" src="https://github.com/adreyfus-stripe/round-up/blob/master/demo.gif?raw=true">
@@ -44,7 +44,7 @@ const paymentIntent = await stripe.paymentIntents.create({
 ### 3. Update the PaymentIntent amount when a customer chooses to round up their order.
 
 When a customer chooses to round up their order and donate the extra amount, you should update the PaymentIntent with a new order amount rounded up to the nearest dollar (eg; 6000 for a 5909 order). 
-You can use the [metadata](https://stripe.com/docs/api/metadata) field to store information about the intended donation. The transfer
+You can use the [metadata](https://stripe.com/docs/api/metadata) field to store information about the intended donation.
 
 ```
 stripe.paymentIntents.update(id, {
@@ -52,7 +52,7 @@ stripe.paymentIntents.update(id, {
     transfer_group: `group_${id}`,
     metadata: {
         isDonating: true,
-        destination: selectedAccount,
+        donationOrg: selectedAccount,
         donationAmount: 91 // Hardcoded for demo but this would change depending on the order
     }
 });
@@ -69,8 +69,8 @@ Using the Transfers API requires onboarding the organization using Stripe's Conn
 
 const { transfer } = await stripe.transfers.create({
     amount: data.object.metadata.donationAmount,
-    currency: "eur",
-    destination: data.object.metadata.destination,
+    currency: "usd",
+    destination: data.object.metadata.donationOrg,
     transfer_group: data.object.transfer_group
 });
 ```

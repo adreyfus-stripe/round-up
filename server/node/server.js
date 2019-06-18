@@ -38,7 +38,7 @@ app.get("/become-a-partner", (req, res) => {
   res.render("connect-onboarding.ejs", { url });
 });
 
-// Verify account
+// Create a new connected account with the onboarding info from Connect
 app.get("/verify-account", async (req, res) => {
   axios
     .post("https://connect.stripe.com/oauth/token", {
@@ -66,9 +66,11 @@ const roundOrderUp = (items, currency) => {
   // In your real app calculate the order total and round up to the nearest dollar
   return { total: 6000, donation: 91 };
 };
+
 // Create a PaymentIntent to use in our checkout page
 app.post("/create-payment-intent", async (req, res) => {
   const { items, currency } = req.body;
+  const publicKey = env.parsed.STRIPE_PUBLIC_KEY;
 
   const paymentIntent = await stripe.paymentIntents.create({
     amount: calculateOrderTotal(items, currency),
@@ -86,7 +88,8 @@ app.post("/create-payment-intent", async (req, res) => {
     clientSecret: paymentIntent.client_secret,
     id: paymentIntent.id,
     redirectDomain: env.parsed.REDIRECT_DOMAIN,
-    connectedAccounts: connectedAccountIds
+    connectedAccounts: connectedAccountIds,
+    publicKey
   });
 });
 
@@ -100,13 +103,14 @@ app.post("/update-payment-intent", async (req, res) => {
       amount: total,
       transfer_group: `group_${id}`, // TODO: Make sure this only gets set once
       metadata: {
-        isDonating: true,
         destination: selectedAccount,
         donationAmount: donation
       }
     });
   } else {
-    stripe.paymentIntents.update(id, { amount: calculateOrderTotal(items, currency) });
+    stripe.paymentIntents.update(id, {
+      amount: calculateOrderTotal(items, currency)
+    });
   }
   res.send();
 });
@@ -138,7 +142,11 @@ app.post("/webhook", async (req, res) => {
   }
 
   if (eventType === "payment_intent.succeeded") {
-    if (data.object.metadata.isDonating) {
+    // Check to see if there is information about a donation on this PaymentIntent
+    if (
+      data.object.metadata.donationAmount &&
+      data.object.metadata.donationOrg
+    ) {
       // Here we use Connect to directly transfer the funds to a connected account
       // but you can simply use metadata to flag payments that have added donations
       // and process a check once a month

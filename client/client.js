@@ -1,50 +1,15 @@
-var stripe = Stripe("pk_test_95CWU9RNeSTr6odyHxPTd8mX", {
-  betas: ["card_payment_method_beta_1"]
-});
-
-/* ------- Set up Stripe Elements to use in checkout form ------- */
-var elements = stripe.elements();
-var style = {
-  base: {
-    color: "#32325d",
-    fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
-    fontSmoothing: "antialiased",
-    fontSize: "16px",
-    "::placeholder": {
-      color: "#aab7c4"
-    }
-  },
-  invalid: {
-    color: "#fa755a",
-    iconColor: "#fa755a"
-  }
-};
-
-var cardNumber = elements.create("cardNumber", {
-  style: style
-});
-
-cardNumber.mount("#card-number");
-
-var cardExpiry = elements.create("cardExpiry", {
-  style: style
-});
-cardExpiry.mount("#card-expiry");
-
-var cardCvc = elements.create("cardCvc", {
-  style: style
-});
-
-cardCvc.mount("#card-cvc");
-
-/* ------- PaymentIntent UI helpers ------- */
-
+/* ------- Global variables ------- */
 var config = {
   clientSecret: "", // stores the PaymentIntent client_secret created on the server
   id: "",
   selectedAccount: "",
   isDonating: false
 };
+
+var stripe; // Wait to initialize until we have our public key
+var cardNumber; // Used to collect card number for later usage with Stripe.js
+
+/* ------- PaymentIntent UI helpers ------- */
 
 /*
  * Calls stripe.handleCardPayment which creates a pop-up modal to
@@ -121,10 +86,10 @@ var createPaymentIntent = function() {
       return result.json();
     })
     .then(function(data) {
+      initStripe(data.publicKey);
       config.clientSecret = data.clientSecret;
       config.id = data.id;
       config.selectedAccount = data.connectedAccounts[0].id;
-
       populateConnectedAccounts(data.connectedAccounts);
     });
 };
@@ -138,6 +103,47 @@ var populateConnectedAccounts = function(connectedAccounts) {
     const fakeName = i ? "Donors Choose" : "Children's Book Fund";
     select[i] = new Option(fakeName, account.id);
   });
+};
+
+var initStripe = function(publicKey) {
+  stripe = Stripe(publicKey, {
+    betas: ["card_payment_method_beta_1"]
+  });
+
+  /* ------- Set up Stripe Elements to use in checkout form ------- */
+  var elements = stripe.elements();
+  var style = {
+    base: {
+      color: "#32325d",
+      fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+      fontSmoothing: "antialiased",
+      fontSize: "16px",
+      "::placeholder": {
+        color: "#aab7c4"
+      }
+    },
+    invalid: {
+      color: "#fa755a",
+      iconColor: "#fa755a"
+    }
+  };
+
+  cardNumber = elements.create("cardNumber", {
+    style: style
+  });
+
+  cardNumber.mount("#card-number");
+
+  var cardExpiry = elements.create("cardExpiry", {
+    style: style
+  });
+  cardExpiry.mount("#card-expiry");
+
+  var cardCvc = elements.create("cardCvc", {
+    style: style
+  });
+
+  cardCvc.mount("#card-cvc");
 };
 
 var updateTotal = function(isDonating) {
