@@ -21,9 +21,12 @@ This demo uses Connect Express to onboard organizations and uses the [Payment In
 
 ## Running the demo
 
-* `git clone https://git.corp.stripe.com/adreyfus/round-up-recipe`
-* Copy the .env.example to .env with your Stripe test keys
-* Run `npm start`
+- `git clone https://github.com/adreyfus-stripe/round-up`
+- `cd round-up`
+- Copy the .env.example to .env with your [Stripe test API keys](https://stripe.com/docs/development#api-keys)
+- Run `npm install` to download dependencies
+- Run `npm start`
+
 
 ## Overview
 
