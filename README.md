@@ -1,4 +1,4 @@
-# Round up and donate
+# [wip] Round up and donate
 
 A round up and donate program allows your customers to round their order total to the nearest dollar and donate the difference to an organization.
 
