@@ -20,6 +20,7 @@ This demo uses Connect Express to onboard non-profits onto Stripe and the [Charg
 ## Running the demo
 
 - `git clone https://github.com/adreyfus-stripe/round-up`
+- `cd round-up`
 - Copy the .env.example to .env with your [Stripe test API keys](https://stripe.com/docs/development#api-keys)
 - Run `npm install` to download dependencies
 - Run `npm start`
